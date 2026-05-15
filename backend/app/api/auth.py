@@ -16,14 +16,25 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 @router.post("/login", response_model=TokenResponse)
 def login(payload: LoginRequest, db: Session = Depends(get_db)) -> TokenResponse:
     user = db.query(AdminUser).filter(AdminUser.email == payload.email).first()
+
+    print("EMAIL:", payload.email)
+    print("USER FOUND:", bool(user))
+
+    if user:
+        print("HASHED PASSWORD:", user.hashed_password)
+        print("VERIFY RESULT:", verify_password(payload.password, user.hashed_password))
+
     if not user or not verify_password(payload.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
         )
+
     if not user.is_active:
         raise HTTPException(status_code=403, detail="User is inactive")
+
     token = create_access_token(user.id, extra={"email": user.email})
+
     return TokenResponse(
         access_token=token,
         expires_in=settings.JWT_EXPIRE_MINUTES * 60,
