@@ -17,13 +17,6 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 def login(payload: LoginRequest, db: Session = Depends(get_db)) -> TokenResponse:
     user = db.query(AdminUser).filter(AdminUser.email == payload.email).first()
 
-    print("EMAIL:", payload.email)
-    print("USER FOUND:", bool(user))
-
-    if user:
-        print("HASHED PASSWORD:", user.hashed_password)
-        print("VERIFY RESULT:", verify_password(payload.password, user.hashed_password))
-
     if not user or not verify_password(payload.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
