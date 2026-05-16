@@ -174,7 +174,11 @@ def generate_batch(
         else:
             raise RuntimeError("Could not generate a unique short token after many attempts.")
 
-        short_link = f"{short_domain}/{token}"
+        # short_link = f"{short_domain}/{token}"
+        clean_domain = (
+            short_domain.replace("https://", "").replace("http://", "").rstrip("/"))
+
+        short_link = f"{clean_domain}/{token}"
         whatsapp_link = _wa_redirect(preset.whatsapp_number, code)
 
         row = QRCode(
